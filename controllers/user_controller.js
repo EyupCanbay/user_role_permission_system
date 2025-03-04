@@ -37,6 +37,29 @@ async function createUser(req,res,next) {
     
 }
 
+async function updateUser(req,res,next) {
+    try{
+        const newUser = await Users.findByIdAndUpdate(
+            req.params.user_id,
+            {
+            email: req.body.email,
+            password: req.body.password,
+            is_active: req.body.is_active,
+            first_name: req.body.first_name,
+            last_name: req.body.last_name,
+            phone_number: req.body.phone_number
+            },
+            { new: true}
+        )
+        
+        res.status(200).json(ResponseHandler.success("kullanıcı başarıyla güncellendi", newUser))
+    }catch (err) {
+        let errorResponse = ResponseHandler.error("kullanıcı güncellenemedi", new CustomError(500, " ",err));
+        res.status(500).json(ResponseHandler.error(errorResponse))
+    }
+    
+}
+
 
 
 
@@ -49,5 +72,5 @@ async function createUser(req,res,next) {
 module.exports = {
     getAllUsers,
     createUser,
-    
+    updateUser
 }
