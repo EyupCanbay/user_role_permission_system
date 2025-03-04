@@ -1,6 +1,7 @@
 const ResponseHandler = require('../lib/responseHandler.js');
 const CustomError = require('../lib/customError.js');
 const Roles = require("../models/Roles.js")
+const rolePrivileges = require('../config/role_privileges.js')
 
 async function getAllRoles(req,res,next){
     try{
@@ -62,12 +63,15 @@ async function deleteRole(req,res,next) {
     }
 }
 
-
+async function getRolePrivileges(req,res,next) {
+    res.json(rolePrivileges) // amaçım client tarafında bütün rolleri tek bir yerden görebilmek
+}
 
 
 module.exports = {
     getAllRoles,
     createRole,
     updateRole,
-    deleteRole
+    deleteRole,
+    getRolePrivileges
 }
