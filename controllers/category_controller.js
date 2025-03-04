@@ -51,7 +51,6 @@ async function updateCategory(req,res,next){
 
 }
 
-
 async function deleteCategory(req,res,next){
 
     try{
