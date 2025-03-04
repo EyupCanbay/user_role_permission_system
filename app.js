@@ -22,7 +22,7 @@ app.use(cookieParser());
 
 
 
-
+app.use('/', require('./routes/category_routes'))
 
 
 
