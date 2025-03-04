@@ -14,7 +14,24 @@ async function getAllRoles(req,res,next){
     }
 }
 
+async function createRole(req,res,next) {
+    try {
+        const newRole = new Roles({
+            role_name: req.body.role_name,
+            is_active: req.body.is_active,
+            created_by: req.user?.id
+        })
+        await newRole.save()
 
+        res.json(ResponseHandler.success("role oluşturuldu",newRole));
+    } catch (error) {
+        let errorResponse = ResponseHandler.error("role oluşturulamadı",error);
+        res.status(500).json(errorResponse)
+    }
+
+
+
+}
 
 
 
@@ -22,5 +39,6 @@ async function getAllRoles(req,res,next){
 
 
 module.exports = {
-    getAllRoles
+    getAllRoles,
+    createRole
 }
