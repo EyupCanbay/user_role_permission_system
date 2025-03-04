@@ -49,6 +49,18 @@ async function updateRole(req,res,next) {
     }
 }
 
+async function deleteRole(req,res,next) {
+    try{
+        const { role_id } = req.params;
+
+        await Roles.findByIdAndDelete(role_id);
+        res.json(ResponseHandler.success("role silindi"));
+
+    } catch (error) {
+        let errorResponse = ResponseHandler.error("role silinmedi",error);
+        res.status(500).json(errorResponse)
+    }
+}
 
 
 
@@ -56,5 +68,6 @@ async function updateRole(req,res,next) {
 module.exports = {
     getAllRoles,
     createRole,
-    updateRole
+    updateRole,
+    deleteRole
 }
