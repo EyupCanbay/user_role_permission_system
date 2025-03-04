@@ -43,7 +43,7 @@ async function updateCategory(req,res,next){
             },
             { new: true}
         )
-        
+
         res.status(200).json(ResponseHandler.success('Category updated successfully', category)); 
     } catch (error) {
         next(error)
@@ -51,8 +51,20 @@ async function updateCategory(req,res,next){
 
 }
 
+
+async function deleteCategory(req,res,next){
+
+    try{
+        await Category.findByIdAndDelete({_id: req.params.category_id});
+        res.status(200).json(ResponseHandler.success('Category deleted successfully'));
+    } catch (error) {
+        res.status(500).json(ResponseHandler.error('An error occurred', error));
+    }
+}
+
 module.exports = {
     getAllCategories,
     createCategory,
-    updateCategory
+    updateCategory,
+    deleteCategory
 }
