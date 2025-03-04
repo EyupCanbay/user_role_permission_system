@@ -28,11 +28,26 @@ async function createRole(req,res,next) {
         let errorResponse = ResponseHandler.error("role oluşturulamadı",error);
         res.status(500).json(errorResponse)
     }
-
-
-
 }
 
+async function updateRole(req,res,next) {
+    try {
+        const newRole = await Roles.findByIdAndUpdate(
+            req.params.role_id,
+            {
+                role_name: req.body.role_name,
+                is_active: req.body.is_active,
+                created_by: req.body.user?.id
+            },
+            {new: true}
+        )
+
+        res.json(ResponseHandler.success("role güncellendi",newRole));
+    } catch (error) {
+        let errorResponse = ResponseHandler.error("role güncellenemedi",error);
+        res.status(500).json(errorResponse)
+    }
+}
 
 
 
@@ -40,5 +55,6 @@ async function createRole(req,res,next) {
 
 module.exports = {
     getAllRoles,
-    createRole
+    createRole,
+    updateRole
 }
