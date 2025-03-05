@@ -4,9 +4,10 @@ const Roles = require("../models/Roles.js")
 const rolePrivileges = require('../config/role_privileges.js');
 const RolePrivileges = require('../models/RolePrivileges.js');
 const mongoose = require('mongoose');
-const AuditLogsModel = require('../models/AuditLogs.js');
 const AuditLog =require("../lib/AuditLogs.js")
-async function getAllRoles(req,res,next){
+const logger = require('../lib/logger/loggerClass.js')
+
+async function getAllRoles(req,res){
     try{
         const roles = await Roles.find()
         
@@ -21,7 +22,7 @@ async function getAllRoles(req,res,next){
     }
 }
 
-async function createRole(req,res,next) {
+async function createRole(req,res) {
 
     //hata kontrolleri yapılacak permission için ve body için
     try {
@@ -51,7 +52,7 @@ async function createRole(req,res,next) {
     }
 }
 
-async function updateRole(req,res,next) {
+async function updateRole(req,res) {
     try {
 
         // fonksiyon doğrulamaları yazılıcak
@@ -102,7 +103,7 @@ async function updateRole(req,res,next) {
     }
 }
 
-async function deleteRole(req,res,next) {
+async function deleteRole(req,res) {
     const session = await mongoose.startSession();
     session.startTransaction();
 
@@ -117,7 +118,7 @@ async function deleteRole(req,res,next) {
 
          AuditLog.info(req.user?.email,"Role","Delete")
          logger.info(req.user?.email, "Role", "Delete")
-         res.json(ResponseHandler.success("role silindi",error));
+         res.status(200).json(ResponseHandler.success("role silindi"));
      } catch (error) {
          logger.error(req.user?.email, "Role", "Delete",error)
          let errorResponse = ResponseHandler.error("role silindi",error);

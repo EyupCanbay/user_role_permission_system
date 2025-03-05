@@ -71,7 +71,7 @@ async function deleteCategory(req,res,next){
 
         res.status(200).json(ResponseHandler.success('Category deleted successfully'));
     } catch (error) {
-        logger.error(req.user?.id, "Categories", "Delete", error)
+        logger.error(req.user?.id, "Categories", "Delete")
         res.status(500).json(ResponseHandler.error('An error occurred', error));
     }
 }

@@ -5,8 +5,10 @@ const bcrypt =require('bcrypt')
 const UserRoles = require('../models/UserRoles.js');
 const Roles = require('../models/Roles.js');
 const Enum = require('../config/Enum.js');
+const AuditLog = require("../lib/AuditLogs.js")
+const logger = require('../lib/logger/loggerClass.js')
 
-async function getAllUsers(req,res,next) {
+async function getAllUsers(req,res) {
     try {
         const users = await Users.find()
         AuditLog.info(req.user?.email,"User","Get",users)
@@ -21,7 +23,7 @@ async function getAllUsers(req,res,next) {
     
 }
 
-async function createUser(req,res,next) {
+async function createUser(req,res) {
     try {
         // email ve password olmak üzere doğrulama fonskiyonları eklenicek
         let password = bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10));
@@ -48,14 +50,14 @@ async function createUser(req,res,next) {
         logger.info(req.user?.email, "User", "Create",roles)
 
         res.status(201).json(ResponseHandler.success("kullanıcı başarıyla oluşturuldu", newUser))
-    }catch (err) {
+    }catch (error) {
         logger.error(req.user?.email, "User", "Create",error)
-        let errorResponse = ResponseHandler.error("kullanıcı oluşturulamadı",err);
+        let errorResponse = ResponseHandler.error("kullanıcı oluşturulamadı",error);
         res.status(500).json(errorResponse)
     }
 }
 
-async function updateUser(req,res,next) {
+async function updateUser(req,res) {
     try{
 
         // doğrulama fondkiyonlaarı yazılacak şifre kısmında dikkatli ol
@@ -82,8 +84,8 @@ async function updateUser(req,res,next) {
         }
 
         if(newRoles.length > 0) {
-            await Promise.all(newRoles.map(async (perm) => {
-                const userRole = new RolePrivileges({
+            await Promise.all(newRoles.map(async () => {
+                const userRole = new UserRoles({
                     role_id: newRoles.role_id,
                     user_id: req.params.user_id,
                 });
@@ -96,14 +98,14 @@ async function updateUser(req,res,next) {
             logger.info(req.user?.email, "User", "Update",newUser)
     
         res.status(200).json(ResponseHandler.success("kullanıcı başarıyla güncellendi", newUser))
-    }catch (err) {
+    }catch (error) {
         logger.error(req.user?.email, "User", "Update",error)
-        let errorResponse = ResponseHandler.error("kullanıcı güncellenemedi", new CustomError(500, " ",err));
+        let errorResponse = ResponseHandler.error("kullanıcı güncellenemedi", new CustomError(500, " ",error));
         res.status(500).json(ResponseHandler.error(errorResponse))
     }
 }
 
-async function deleteUser(req,res,next) {
+async function deleteUser(req,res) {
     try {
         await Users.findByIdAndDelete(req.params.user_id)
         await UserRoles.deleteMany({user_id: req.params.user_id})
@@ -112,14 +114,14 @@ async function deleteUser(req,res,next) {
         logger.info(req.user?.email, "User", "Delete")
 
         res.status(200).json(ResponseHandler.success("kullanıcı başarıyla silindi"))
-    }catch (err) {
+    }catch (error) {
         logger.error(req.user?.email, "User", "Delete",error)
-        let errorResponse = ResponseHandler.error("kullanıcı silinemedi", err);
+        let errorResponse = ResponseHandler.error("kullanıcı silinemedi", error);
         res.status(500).json(ResponseHandler.error(errorResponse))
     }
 }
 
-async function register(req,res,next) {
+async function register(req,res) {
     try {
         const user = await Users.find();
         if(user.length > 0) return res.status(404).json("hata")
@@ -153,7 +155,7 @@ async function register(req,res,next) {
     }catch (error) {
         logger.error(req.user?.email, "User", "Register",error)
 
-        let errorResponse = ResponseHandler.error("kullanıcı oluşturulamadı",err);
+        let errorResponse = ResponseHandler.error("kullanıcı oluşturulamadı",error);
         res.status(500).json(ResponseHandler.error(errorResponse))
     }
     

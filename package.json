@@ -31,5 +31,10 @@
     "morgan": "^1.10.0",
     "nodemon": "^3.1.9",
     "winston": "^3.17.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.21.0",
+    "eslint": "^9.21.0",
+    "globals": "^16.0.0"
   }
 }
