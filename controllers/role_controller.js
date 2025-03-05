@@ -41,9 +41,11 @@ async function createRole(req,res,next) {
 
             await rolePriv.save()
             }))
-        
+        AuditLog.info(req.user?.email, "Role", "Create", newRole);
+        logger.info(req.user?.email, "Role", "Create", newRole)
         res.json(ResponseHandler.success("role oluşturuldu",newRole));
     } catch (error) {
+        logger.error(req.user?.email, "ROle", "Create", error)
         let errorResponse = ResponseHandler.error("role oluşturulamadı",error);
         res.status(500).json(errorResponse)
     }
@@ -52,22 +54,18 @@ async function createRole(req,res,next) {
 async function updateRole(req,res,next) {
     try {
 
-
         // fonksiyon doğrulamaları yazılıcak
     
     if(req.body.permissions && Array.isArray(req.body.permissions) && req.body.permissions.length > 0){
-        console.log("req.params.role_id", req.params.role_id)
+
         let rolePrivs = await RolePrivileges.find({role_id: req.params.role_id })
-        console.log("db roles",rolePrivs, rolePrivs.length)
 
         const removedPermissions =  rolePrivs.filter(x => !req.body.permissions.includes(x.permission))
         let newPermissions = req.body.permissions.filter(x => !rolePrivs.map(p=> p.permission).includes(x))
-        console.log("remove",removedPermissions)
+
         if(removedPermissions.length > 0) {
             await RolePrivileges.deleteMany({_id: {$in: removedPermissions.map(x => x._id)}}) 
-            console.log("db rollei silindi") 
         }
-        console.log("new permi",newPermissions,newPermissions.length )
 
         if(newPermissions.length > 0) {
             console.log("req body",req.body.permissions)
@@ -94,10 +92,11 @@ async function updateRole(req,res,next) {
             {new: true}
         )
 
-        //let role = [[newRole], [rolePriv]]
-
+        AuditLog.info(req.user?.email,"Role","Update",newRole)
+        logger.info(req.user?.email, "Role", "Update",newRole)
         res.json(ResponseHandler.success("role güncellendi",newRole));
     } catch (error) {
+        logger.error(req.user?.email, "Role", "Update",error)
         let errorResponse = ResponseHandler.error("role güncellenemedi",error);
         res.status(500).json(errorResponse)
     }
@@ -115,14 +114,16 @@ async function deleteRole(req,res,next) {
          ])
          console.log("rolesilindi", req.params.role_id)
          await session.commitTransaction();
-        res.json(ResponseHandler.success("role silindi"));
 
-    } catch (error) {
-        let errorResponse = ResponseHandler.error("role silinmedi",error);
-        res.status(500).json(errorResponse)
-    }
+         AuditLog.info(req.user?.email,"Role","Delete")
+         logger.info(req.user?.email, "Role", "Delete")
+         res.json(ResponseHandler.success("role silindi",error));
+     } catch (error) {
+         logger.error(req.user?.email, "Role", "Delete",error)
+         let errorResponse = ResponseHandler.error("role silindi",error);
+         res.status(500).json(errorResponse)
 }
-
+}
 async function getRolePrivileges(req,res,next) {
     res.json(rolePrivileges) // amaçım client tarafında bütün rolleri tek bir yerden görebilmek
 }
