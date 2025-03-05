@@ -3,15 +3,20 @@ const CustomError = require('../lib/customError.js');
 const Roles = require("../models/Roles.js")
 const rolePrivileges = require('../config/role_privileges.js');
 const RolePrivileges = require('../models/RolePrivileges.js');
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
+const AuditLogsModel = require('../models/AuditLogs.js');
+const AuditLog =require("../lib/AuditLogs.js")
 async function getAllRoles(req,res,next){
     try{
         const roles = await Roles.find()
         
         if(roles.length == 0) throw new CustomError(400,'Bad Request', 'Role name and is_active cannot be empty')
 
+        AuditLog.info(req.user?.email, "Role", "Get", roles)
+        logger.info(req.user?.email, "Role", "Get", roles)
         res.status(200).json(ResponseHandler.success('Roles retrieved successfully', roles));
     } catch (error) {
+        logger.error(req.user?.email, "Role", "Get", error )
         res.status(500).json(ResponseHandler.error('An error occurred', error));
     }
 }
