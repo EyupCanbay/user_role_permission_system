@@ -1,6 +1,9 @@
 const ResponseHandler = require('../lib/responseHandler.js');
 const CustomError = require('../lib/customError.js');
 const Category = require("../models/Categories.js")
+const AuditLog = require('../lib/AuditLogs.js')
+const logger = require('../lib/logger/loggerClass.js')
+
 
 async function getAllCategories(req,res,next){
     try{    
@@ -23,14 +26,17 @@ async function createCategory(req,res,next){
         })
         await category.save()
 
+        AuditLog.info(req.user?.email, "Categories", "Create", category)
+        logger.info(req.user?.email, "Categories", "Create", category)
+
         res.status(201).json(ResponseHandler.success('Category created successfully', category)); 
     } catch (error) {
+        logger.error(req.user?.email, "Categories", "Create", error)
         res.status(500).json(ResponseHandler.error('An error occurred', error));
     }
 }
 
 async function updateCategory(req,res,next){
-    const category_id = req.params.category_id;
 
     try{
 
@@ -44,8 +50,12 @@ async function updateCategory(req,res,next){
             { new: true}
         )
 
+        AuditLog.info(req.user?.email, "Categories", "Update", {_id: req.body.id, ...category})
+        logger.info(req.user?.email, "Categories", "Update", category)
+
         res.status(200).json(ResponseHandler.success('Category updated successfully', category)); 
     } catch (error) {
+        logger.error(req.user?.email, "Categories", "Update", error)
         next(error)
     }
 
@@ -55,8 +65,13 @@ async function deleteCategory(req,res,next){
 
     try{
         await Category.findByIdAndDelete({_id: req.params.category_id});
+        
+        AuditLog.info(req.user?.email, "Categories", "Delete", {_id: req.body.id})
+        logger.info(req.user?.email, "Catgories", "Delete", {_id: req.body.id})
+
         res.status(200).json(ResponseHandler.success('Category deleted successfully'));
     } catch (error) {
+        logger.error(req.user?.id, "Categories", "Delete", error)
         res.status(500).json(ResponseHandler.error('An error occurred', error));
     }
 }

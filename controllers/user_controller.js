@@ -9,8 +9,12 @@ const Enum = require('../config/Enum.js');
 async function getAllUsers(req,res,next) {
     try {
         const users = await Users.find()
+        AuditLog.info(req.user?.email,"User","Get",users)
+        logger.info(req.user?.email, "User", "Get",users)
         res.json(ResponseHandler.success("kullanıcılar başarıyla çekildi", users))
     }catch (error) {
+        logger.error(req.user?.email, "User", "Get",error)
+
         let errorResponse = ResponseHandler.error("kullanıcılar çekilemedi",error);
         res.status(500).json(ResponseHandler.error(errorResponse))
     }
@@ -39,9 +43,13 @@ async function createUser(req,res,next) {
                 user_id: newUser._id
             })
         }
-console.log(roles)
+
+        AuditLog.info(req.user?.email,"User","Create",roles)
+        logger.info(req.user?.email, "User", "Create",roles)
+
         res.status(201).json(ResponseHandler.success("kullanıcı başarıyla oluşturuldu", newUser))
     }catch (err) {
+        logger.error(req.user?.email, "User", "Create",error)
         let errorResponse = ResponseHandler.error("kullanıcı oluşturulamadı",err);
         res.status(500).json(errorResponse)
     }
@@ -84,8 +92,12 @@ async function updateUser(req,res,next) {
                 await userRole.save()
                 }))
             }
+            AuditLog.info(req.user?.email,"User","Update",newUser)
+            logger.info(req.user?.email, "User", "Update",newUser)
+    
         res.status(200).json(ResponseHandler.success("kullanıcı başarıyla güncellendi", newUser))
     }catch (err) {
+        logger.error(req.user?.email, "User", "Update",error)
         let errorResponse = ResponseHandler.error("kullanıcı güncellenemedi", new CustomError(500, " ",err));
         res.status(500).json(ResponseHandler.error(errorResponse))
     }
@@ -95,8 +107,13 @@ async function deleteUser(req,res,next) {
     try {
         await Users.findByIdAndDelete(req.params.user_id)
         await UserRoles.deleteMany({user_id: req.params.user_id})
+
+        AuditLog.info(req.user?.email,"User","Delete")
+        logger.info(req.user?.email, "User", "Delete")
+
         res.status(200).json(ResponseHandler.success("kullanıcı başarıyla silindi"))
     }catch (err) {
+        logger.error(req.user?.email, "User", "Delete",error)
         let errorResponse = ResponseHandler.error("kullanıcı silinemedi", err);
         res.status(500).json(ResponseHandler.error(errorResponse))
     }
@@ -129,8 +146,13 @@ async function register(req,res,next) {
             user_id: newUser._id
         })
 
+        AuditLog.info(req.user?.email,"User","Register",newUser)
+        logger.info(req.user?.email, "User", "Register",newUser)
+
         res.status(201).json(ResponseHandler.success("kullanıcı başarıyla oluşturuldu", newUser))
-    }catch (err) {
+    }catch (error) {
+        logger.error(req.user?.email, "User", "Register",error)
+
         let errorResponse = ResponseHandler.error("kullanıcı oluşturulamadı",err);
         res.status(500).json(ResponseHandler.error(errorResponse))
     }
