@@ -39,6 +39,8 @@ async function createUser(req,res,next) {
 
 async function updateUser(req,res,next) {
     try{
+
+        // doğrulama fondkiyonlaarı yazılacak şifre kısmında dikkatli ol
         const newUser = await Users.findByIdAndUpdate(
             req.params.user_id,
             {
@@ -57,11 +59,18 @@ async function updateUser(req,res,next) {
         let errorResponse = ResponseHandler.error("kullanıcı güncellenemedi", new CustomError(500, " ",err));
         res.status(500).json(ResponseHandler.error(errorResponse))
     }
-    
 }
 
+async function deleteUser(req,res,next) {
+    try {
+        await Users.findByIdAndDelete(req.params.user_id)
 
-
+        res.status(200).json(ResponseHandler.success("kullanıcı başarıyla silindi"))
+    }catch (err) {
+        let errorResponse = ResponseHandler.error("kullanıcı silinemedi", err);
+        res.status(500).json(ResponseHandler.error(errorResponse))
+    }
+}
 
 
 
@@ -72,5 +81,6 @@ async function updateUser(req,res,next) {
 module.exports = {
     getAllUsers,
     createUser,
-    updateUser
+    updateUser,
+    deleteUser
 }
