@@ -20,8 +20,6 @@ app.use(cookieParser());
 
 
 
-
-//app.use('*', checkUser)
 app.use('/categories', require('./routes/category_routes'))
 app.use('/roles', require('./routes/role_routes'));
 app.use('/users', require('./routes/user_routes'));

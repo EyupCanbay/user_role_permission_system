@@ -46,16 +46,24 @@ async function createUser(req,res) {
                 user_id: newUser._id
             })
         }
+        const token = jwt.sign(
+            { user_id: newUser._id },
+            process.env.JWT_SECRET,
+            { expiresIn: '2d' }
+        );
 
-        const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, { expiresIn: "1h" });
+        console.log(token);
+        res.cookie('jwt', token, {
+            httpOnly: true,
+            maxAge: 2 * 24 * 60 * 60 * 1000,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax'
+        });
+        
+        AuditLog.info(req.user?.email,"User","Create",{newUser,roles})
+        logger.info(req.user?.email, "User", "Create",{roles,newUser})
 
-        res.setHeader("Authorization", `Bearer ${token}`);
-
-
-        AuditLog.info(req.user?.email,"User","Create",{newUser,roles,token})
-        logger.info(req.user?.email, "User", "Create",{roles,newUser,token})
-
-        res.status(201).json(ResponseHandler.success("kullanıcı başarıyla oluşturuldu", {newUser,roles,token}))
+        res.status(201).json(ResponseHandler.success("kullanıcı başarıyla oluşturuldu", {newUser,roles}))
     }catch (error) {
         logger.error(req.user?.email, "User", "Create",error)
         let errorResponse = ResponseHandler.error("kullanıcı oluşturulamadı",error);
@@ -154,12 +162,23 @@ async function register(req,res) {
             user_id: newUser._id
         })
 
-        const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, { expiresIn: "1h" });
+        const token = jwt.sign(
+            { user_id: user._id },
+            process.env.JWT_SECRET,
+            { expiresIn: '2d' }
+        );
 
-        res.setHeader("Authorization", `Bearer ${token}`);
+        console.log(token);
 
+        res.cookie('jwt', token, {
+            httpOnly: true,
+            maxAge: 2 * 24 * 60 * 60 * 1000,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax'
+        });
+        
         AuditLog.info(req.user?.email,"User","Register",newUser)
-        logger.info(req.user?.email, "User", "Register",{newUser,token})
+        logger.info(req.user?.email, "User", "Register",{newUser})
         res.status(201).json(ResponseHandler.success("kullanıcı başarıyla oluşturuldu", newUser))
     }catch (error) {
         logger.error(req.user?.email, "User", "Register", error)
@@ -171,23 +190,33 @@ async function register(req,res) {
 
 async function login(req, res) {
     try {
-        const { email, password } = req.body;
+        const user = req.body;
 
-        const user = await Users.findOne({ email });
-        if (!user) {
-            return res.status(401).json(ResponseHandler.error("E-posta veya şifre hatalı"));
-        }
+        // const user = await Users.findOne({ email });
+        // if (!user) {
+        //     return res.status(401).json(ResponseHandler.error("E-posta veya şifre hatalı"));
+        // }
 
-        const isPasswordValid = await bcrypt.compare(password, user.password);
-        if (!isPasswordValid) {
-            return res.status(401).json(ResponseHandler.error("E-posta veya şifre hatalı"));
-        }
+        // const isPasswordValid = await bcrypt.compare(password, user.password);
+        // if (!isPasswordValid) {
+        //     return res.status(401).json(ResponseHandler.error("E-posta veya şifre hatalı"));
+        // }
 
-        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1h" });
+        const token = jwt.sign(
+            { user_id: user._id },
+            process.env.JWT_SECRET,
+            { expiresIn: '2d' }
+        );
 
-        res.setHeader("Authorization", `Bearer ${token}`);
+        console.log(token);
+        res.cookie('jwt', token, {
+            httpOnly: true,
+            maxAge: 2 * 24 * 60 * 60 * 1000,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax'
+        });
 
-        res.json(ResponseHandler.success("Giriş başarılı", { token, user }));
+        res.json(ResponseHandler.success("Giriş başarılı", { token }));
     } catch (error) {
         return res.status(500).json(ResponseHandler.error("Sunucu hatası", error.message));
     }
