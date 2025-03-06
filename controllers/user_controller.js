@@ -7,6 +7,7 @@ const Roles = require('../models/Roles.js');
 const Enum = require('../config/Enum.js');
 const AuditLog = require("../lib/AuditLogs.js")
 const logger = require('../lib/logger/loggerClass.js')
+const jwt = require('jsonwebtoken')
 
 async function getAllUsers(req,res) {
     try {
@@ -46,10 +47,15 @@ async function createUser(req,res) {
             })
         }
 
-        AuditLog.info(req.user?.email,"User","Create",roles)
-        logger.info(req.user?.email, "User", "Create",roles)
+        const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, { expiresIn: "1h" });
 
-        res.status(201).json(ResponseHandler.success("kullanıcı başarıyla oluşturuldu", newUser))
+        res.setHeader("Authorization", `Bearer ${token}`);
+
+
+        AuditLog.info(req.user?.email,"User","Create",{newUser,roles,token})
+        logger.info(req.user?.email, "User", "Create",{roles,newUser,token})
+
+        res.status(201).json(ResponseHandler.success("kullanıcı başarıyla oluşturuldu", {newUser,roles,token}))
     }catch (error) {
         logger.error(req.user?.email, "User", "Create",error)
         let errorResponse = ResponseHandler.error("kullanıcı oluşturulamadı",error);
@@ -148,20 +154,46 @@ async function register(req,res) {
             user_id: newUser._id
         })
 
-        AuditLog.info(req.user?.email,"User","Register",newUser)
-        logger.info(req.user?.email, "User", "Register",newUser)
+        const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, { expiresIn: "1h" });
 
+        res.setHeader("Authorization", `Bearer ${token}`);
+
+        AuditLog.info(req.user?.email,"User","Register",newUser)
+        logger.info(req.user?.email, "User", "Register",{newUser,token})
         res.status(201).json(ResponseHandler.success("kullanıcı başarıyla oluşturuldu", newUser))
     }catch (error) {
-        logger.error(req.user?.email, "User", "Register",error)
-
+        logger.error(req.user?.email, "User", "Register", error)
         let errorResponse = ResponseHandler.error("kullanıcı oluşturulamadı",error);
-        res.status(500).json(ResponseHandler.error(errorResponse))
+        res.status(500).json(errorResponse)
     }
     
 }
 
+async function login(req, res) {
+    try {
+        const { email, password } = req.body;
 
+        const user = await Users.findOne({ email });
+        if (!user) {
+            return res.status(401).json(ResponseHandler.error("E-posta veya şifre hatalı"));
+        }
+
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        if (!isPasswordValid) {
+            return res.status(401).json(ResponseHandler.error("E-posta veya şifre hatalı"));
+        }
+
+        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1h" });
+
+        res.setHeader("Authorization", `Bearer ${token}`);
+
+        res.json(ResponseHandler.success("Giriş başarılı", { token, user }));
+    } catch (error) {
+        return res.status(500).json(ResponseHandler.error("Sunucu hatası", error.message));
+    }
+}
+
+    
 
 
 
@@ -170,5 +202,6 @@ module.exports = {
     createUser,
     updateUser,
     deleteUser,
-    register
+    register,
+    login
 }
