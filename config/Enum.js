@@ -21,6 +21,7 @@ module.exports = {
     },
 
     SUPER_ADMIN: "SUPER_ADMIN",
+    DEFAULT_LANG: process.env.DEFAULT_LANG || "EN",
 
     LOG_LEVELS: {
         "INFO": "INFO",
