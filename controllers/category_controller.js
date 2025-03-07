@@ -3,7 +3,7 @@ const CustomError = require('../lib/customError.js');
 const Category = require("../models/Categories.js")
 const AuditLog = require('../lib/AuditLogs.js')
 const logger = require('../lib/logger/loggerClass.js')
-
+const emitter = require('../lib/Emitter.js');
 
 async function getAllCategories(req,res,next){
     try{    
@@ -26,9 +26,9 @@ async function createCategory(req,res,next){
         })
         await category.save()
 
-        AuditLog.info(req.user?.email, "Categories", "Create", category)
-        logger.info(req.user?.email, "Categories", "Create", category)
-
+        //AuditLog.info(req.user?.email, "Categories", "Create", category)
+        //logger.info(req.user?.email, "Categories", "Create", category)
+        emitter.getEmitter('notifications').emit('messages', {message: category.name + ' created'})
         res.status(201).json(ResponseHandler.success('Category created successfully', category)); 
     } catch (error) {
         logger.error(req.user?.email, "Categories", "Create", error)
