@@ -25,7 +25,7 @@ app.use('/roles', require('./routes/role_routes'));
 app.use('/users', require('./routes/user_routes'));
 app.use('/auditlog', require('./routes/audit_routes'))
 app.use('/events', require('./routes/event_routes'))
-
+app.use('/stats', require('./routes/stats_routes'))
 
 
 
