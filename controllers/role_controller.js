@@ -9,7 +9,7 @@ const logger = require('../lib/logger/loggerClass.js')
 
 async function getAllRoles(req,res){
     try{
-        const roles = await Roles.find()
+        const roles = await Roles.find().populate("role_privileges")
         
         if(roles.length == 0) throw new CustomError(400,'Bad Request', 'Role name and is_active cannot be empty')
 

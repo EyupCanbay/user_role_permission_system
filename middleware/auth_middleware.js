@@ -7,6 +7,7 @@ const ResponseHandler = require('../lib/responseHandler')
 const Enum = require('../config/Enum')
 const CustomError = require('../lib/customError')
 const privs = require('../config/role_privileges')
+
 async function tokenVerify(token) {
     try {
         return jwt.verify(token, process.env.JWT_SECRET)
