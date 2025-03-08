@@ -5,7 +5,21 @@ const AuditLog = require('../lib/AuditLogs.js')
 const logger = require('../lib/logger/loggerClass.js')
 const emitter = require('../lib/Emitter.js');
 const excelExports = require('../lib/export.js');
+const multer = require('multer');
 const fs = require('fs');
+const path = require('path');
+const Import = require('../lib/import.js');
+
+let multerStorage = multer.diskStorage({
+    destination: function(req, file, next){
+    next (null, __dirname+'../tmp')
+    },
+    filename: function(req, file, next){
+        next(null, file.fieldname + '_' + Date.now()+ path.extname(file.originalname))
+    }
+})
+const upload = multer({storage: multerStorage}).single('pb_file')
+
 async function getAllCategories(req,res,next){
     try{    
         console.log("categories")
@@ -15,6 +29,8 @@ async function getAllCategories(req,res,next){
         res.status(500).json(ResponseHandler.error('An error occurred', error));
     }
 } 
+
+
 
 async function createCategory(req,res,next){
     const body = req.body;
@@ -96,10 +112,37 @@ async function exportExcel(req,res,next) {
     }
 }
 
+
+async function importExcel(req,res,next) {
+    try{    
+
+        let file = req.file;
+        let body = req.body;
+
+        let rows = Import.fromExcel(file.path);
+
+        if(name){
+            for(let i=1; i<rows.length; i++){
+                let categories = new Category({
+                    name: rows[i][0],
+                    is_active: rows[i][1],
+                    created_by: rows[i][2],
+                    created_at: rows[i][3]
+                })
+                await categories.save()
+            }
+        }
+
+        res.status(200).json(ResponseHandler.success('Categories retrieved successfully', categories));
+    } catch (error) {
+        res.status(500).json(ResponseHandler.error('An error occurred', error));
+    }
+}
 module.exports = {
     getAllCategories,
     createCategory,
     updateCategory,
     deleteCategory,
-    exportExcel
+    exportExcel,
+    importExcel
 }
