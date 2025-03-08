@@ -4,7 +4,8 @@ const Category = require("../models/Categories.js")
 const AuditLog = require('../lib/AuditLogs.js')
 const logger = require('../lib/logger/loggerClass.js')
 const emitter = require('../lib/Emitter.js');
-
+const excelExports = require('../lib/export.js');
+const fs = require('fs');
 async function getAllCategories(req,res,next){
     try{    
         console.log("categories")
@@ -76,9 +77,29 @@ async function deleteCategory(req,res,next){
     }
 }
 
+async function exportExcel(req,res,next) {
+    try{    
+        let categories =await Category.find();
+        let excel=new excelExports(
+            ["NAME", "IS_ACTIVE", "CREATED_BY", "CREATED_AT"],
+            ["name", "is_active", "created_by", "created_at"],
+            categories
+        )
+
+        let fileName = __dirname+'../tmp/categories_excel_'+Date.now()+'.xlsx';
+        fs.writeFileSync(fileName, excel, "UTF-8");
+        res.download(fileName)
+        fs.unlinkSync(fileName)
+        res.status(200).json(ResponseHandler.success('Categories retrieved successfully', categories));
+    } catch (error) {
+        res.status(500).json(ResponseHandler.error('An error occurred', error));
+    }
+}
+
 module.exports = {
     getAllCategories,
     createCategory,
     updateCategory,
-    deleteCategory
+    deleteCategory,
+    exportExcel
 }
