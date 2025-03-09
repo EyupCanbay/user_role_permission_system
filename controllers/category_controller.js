@@ -18,7 +18,7 @@ let multerStorage = multer.diskStorage({
         next(null, file.fieldname + '_' + Date.now()+ path.extname(file.originalname))
     }
 })
-const upload = multer({storage: multerStorage}).single('pb_file')
+function upload() { multer({storage: multerStorage}).single('pb_file')}
 
 async function getAllCategories(req,res,next){
     try{    
@@ -144,5 +144,6 @@ module.exports = {
     updateCategory,
     deleteCategory,
     exportExcel,
-    importExcel
+    importExcel,
+    upload
 }

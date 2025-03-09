@@ -11,10 +11,11 @@ const jwt = require('jsonwebtoken')
 
 async function getAllUsers(req,res) {
     try {
-        const users = await Users.find().select("-password")
+        const users = await Users.find().select("-password").lean()
+        console.log(users)
         for(let i = 0; i < users.length; i++) {
             let roles = await UserRoles.find({user_id: users[i]._id}).populate("role_id")
-            users[i].roles = roles.map(x => x.role_id)
+            users[i].roles = roles;
         }
         AuditLog.info(req.user?.email,"User","Get",users)
         logger.info(req.user?.email, "User", "Get",users)
@@ -23,7 +24,7 @@ async function getAllUsers(req,res) {
         logger.error(req.user?.email, "User", "Get",error)
 
         let errorResponse = ResponseHandler.error("kullanıcılar çekilemedi",error);
-        res.status(500).json(ResponseHandler.error(errorResponse))
+        res.status(500).json(errorResponse)
     }
     
 }
