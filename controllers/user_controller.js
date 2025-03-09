@@ -79,7 +79,14 @@ async function createUser(req,res) {
 async function updateUser(req,res) {
     try{
 
+
         // doğrulama fondkiyonlaarı yazılacak şifre kısmında dikkatli ol
+        
+    if(req.user.id == req.body._id) {//
+    req.body.roles = null;
+    // throw new CustomError(400, "Kendi bilgilerinizi güncelleyemezsiniz")
+    }
+        
         const newUser = await Users.findByIdAndUpdate(
             req.params.user_id,
             {
@@ -195,20 +202,20 @@ async function register(req,res) {
 
 async function login(req, res) {
     try {
-        const user = req.body;
+        let user = req.body;
 
-        // const user = await Users.findOne({ email });
-        // if (!user) {
-        //     return res.status(401).json(ResponseHandler.error("E-posta veya şifre hatalı"));
-        // }
+        userFind  = await Users.findOne({ email: user.email });
+        if (!userFind) {
+            return res.status(401).json(ResponseHandler.error("E-posta veya şifre hatalı"));
+        }
 
-        // const isPasswordValid = await bcrypt.compare(password, user.password);
-        // if (!isPasswordValid) {
-        //     return res.status(401).json(ResponseHandler.error("E-posta veya şifre hatalı"));
-        // }
+        const isPasswordValid = await bcrypt.compare(user.password, userFind.password);
+        if (!isPasswordValid) {
+            return res.status(401).json(ResponseHandler.error("E-posta veya şifre hatalı"));
+        }
 
         const token = jwt.sign(
-            { user_id: user._id },
+            { user_id: userFind._id },
             process.env.JWT_SECRET,
             { expiresIn: '2d' }
         );

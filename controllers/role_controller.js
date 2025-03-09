@@ -56,7 +56,8 @@ async function updateRole(req,res) {
     try {
 
         // fonksiyon doğrulamaları yazılıcak
-    
+    let userRole = await Roles.findOne({user_id: req.user.id, role_id: req.body._id})
+    if (userRole) throw new CustomError(403, 'Forbidden', 'Need permission')
     if(req.body.permissions && Array.isArray(req.body.permissions) && req.body.permissions.length > 0){
 
         let rolePrivs = await RolePrivileges.find({role_id: req.params.role_id })
