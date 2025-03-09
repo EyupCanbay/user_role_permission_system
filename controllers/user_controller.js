@@ -84,7 +84,6 @@ async function updateUser(req,res) {
         
     if(req.user.id == req.body._id) {//
     req.body.roles = null;
-    // throw new CustomError(400, "Kendi bilgilerinizi güncelleyemezsiniz")
     }
         
         const newUser = await Users.findByIdAndUpdate(

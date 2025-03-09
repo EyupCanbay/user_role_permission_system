@@ -41,16 +41,14 @@ function checkRole(requiredRole, mode) {
     return (req,res,next) => {
         try {
             const userRoles = req.role;
-            if (!userRoles || !Array.isArray(userRoles)) return ResponseHandler.error({message: "AUTHORIZATION_ERROR"});
-            console.log(userRoles)
+            if (!userRoles || !Array.isArray(userRoles)) return ResponseHandler.error({message: "role_not_found"});
         
         const hasRoles = 
             mode === "OR" 
                 ? userRoles.some(role => requiredRole.includes(role.key)) 
                 : userRoles.every(role => requiredRole.includes(role.key));
 
-            console.log(hasRoles , "dksfkkdfskd")
-            if (!hasRoles) return ResponseHandler.error({message: "AUTHORIZATION_ERROR"});
+            if (!hasRoles) return ResponseHandler.error({message: "Role bulunamadı"});
 
             next();
         }catch (error) {

@@ -2,9 +2,9 @@ const express = require('express');
 const router = express.Router();
 const statsController = require('../controllers/stats_controller.js')
 
-router.get('/categories', statsController.getStats)
-router.get('/unique', statsController.getStatsUnique)
-router.get('/users', statsController.getUsersCount)
+router.get('/categories', checkRole("stats_view", "OR"), statsController.getStats)
+router.get('/unique',checkRole("stats_view", "OR"), statsController.getStatsUnique)
+router.get('/users',checkRole("stats_view", "OR"), statsController.getUsersCount)
 
 
 
