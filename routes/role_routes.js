@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const roleController = require('../controllers/role_controller');
+const {checkUser, checkRole} = require('../middleware/auth_middleware.js')
 
 
 router.get('/', checkRole("user_add", "OR"),roleController.getAllRoles);
